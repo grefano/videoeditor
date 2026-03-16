@@ -4,6 +4,7 @@
 #include <functional>
 #include <cstring>
 
+
 struct TimelineUI{
     Timeline* tl;
     ImVec2 view_time_window;
@@ -21,6 +22,13 @@ struct TimelineUI{
     float get_x(float time){
         return (time - view_time_window.x) * px_per_sec;
     }  
+    float get_t(float x){
+        // (time - view_time_window.x) * px_per_sec = x;
+        // time * pxsec - view.x*px_per_sec = x
+        // time = (x + view.x*px_per_sec ) / px_sec
+        // time = (x/ px_sec + view.x ) 
+        return (x / px_per_sec + view_time_window.x);
+    }
     struct ClipState{
         Clip* clip;
         ImVec2 pos;
@@ -90,7 +98,18 @@ struct TimelineUI{
         }
     }
 
-
+    struct Application{
+        virtual void soltar_source(Timeline* tl, size_t track, MediaSource* source, ImVec2 t){
+            // MediaSource* file1 = (*mediapool).add_file(filepath);
+            Clip* clip = tl->add_clip(track, t.x, t.y);
+            float scale = 2;
+            auto comp = clip->add_component<Transform>();
+            comp->scale = {1,1};
+            comp->position = {0,0};
+            clip->masterclip = new VideoClip(source);
+        }
+    };
+    Application app;
     void draw(){
         printf("draw timeline\n");
         ImGui::Begin("tl");                          
@@ -99,13 +118,32 @@ struct TimelineUI{
         ImVec2 cursorpos = ImGui::GetMousePos();
         this->set_size(ImGui::GetWindowWidth(), 300);
         drawlist->AddRectFilled(screenpos, ImVec2(screenpos.x+this->size.x, screenpos.y+this->size.y), IM_COL32(40, 40, 40, 255));
+        int i = 0;
         for(auto& track : (*tl).tracks_){
             printf("track id %d", track.id);
             ImVec2 track_pos = this->get_track_pos(track.id);
             ImVec2 track_size = this->get_track_size(track.id);
-            drawlist->AddRectFilled(ImVec2(screenpos.x+track_pos.x, screenpos.y+track_pos.y),
-                ImVec2(screenpos.x+track_pos.x+track_size.x, screenpos.y+track_pos.y+track_size.y), IM_COL32(80, 80, 100, 255));
+            ImVec2 pos =ImVec2(screenpos.x+track_pos.x, screenpos.y+track_pos.y);
+            ImGui::SetCursorScreenPos(pos);
+            ImGui::InvisibleButton(("soltar " + std::to_string(i)).c_str(), track_size, 0);
+            i++;
+            drawlist->AddRectFilled(pos,
+                ImVec2(pos.x+track_size.x, pos.y+track_size.y), IM_COL32(80, 80, 100, 255));
+            
+            if (ImGui::BeginDragDropTarget()){
+                printf("dragged mediasource");
+                if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MEDIASOURCE")){
+                    MediaSource* source = static_cast<MediaSource*>(payload->Data);
+                    printf("dragged mediasource %s\n", source->filepath);
+                    
+                    float rel_x = cursorpos.x - pos.x;
 
+                    ImVec2 t = {get_t(rel_x), 0};
+                    t.y = t.x + 10;
+                    app.soltar_source(tl, track.id, source, t);
+                }
+                ImGui::EndDragDropTarget();
+            }
             for(auto& clip : track.clips){
                 printf("track pos %f", track_pos.y);
                 printf("clip t0 %f t1 %f\n", (*clip).tl_time0, (*clip).tl_time1);
@@ -196,7 +234,7 @@ struct MediapoolUI{
         int source_size = 200;
         int source_sep = 20;
         
-        ImGui::Begin("mediapool");  
+        ImGui::Begin("mediapool", NULL, ImGuiWindowFlags_NoMove);  
         ImVec2 screenpos = ImGui::GetCursorScreenPos();
         ImVec2 regionavail = ImGui::GetContentRegionAvail();
         int qtd_sources =  (regionavail.x-source_sep) / (source_sep+source_size);
@@ -212,18 +250,24 @@ struct MediapoolUI{
             ImVec2 ipos = {i % qtd_sources, (int)(i / qtd_sources)};
             ImVec2 pos = {screenpos.x + ipos.x * (source_sep + source_size), screenpos.y + ipos.y * (source_sep + source_size)};
             ImVec2 pos2 = {pos.x + source_size, pos.y + source_size};
+            ImGui::SetCursorScreenPos(pos);
+            ImGui::InvisibleButton(("drag" + std::to_string(i)).c_str(), {source_size, source_size});
             drawlist->AddRectFilled(pos, pos2, IM_COL32(200, 230, 220, 255));
+            if (ImGui::BeginDragDropSource()){
+                ImGui::SetDragDropPayload("MEDIASOURCE", source.get(), sizeof(MediaSource), ImGuiCond_Once);
+                ImGui::Text("teste");
+                ImGui::BeginTooltip();
+                ImGui::Text("dragging %d", i);
+                ImGui::EndTooltip();
+                ImGui::EndDragDropSource();
+            }
             ImVec2 textsize = ImGui::CalcTextSize(path);
             // float textident = (regionavail.x + textsize.x) / 2;
             ImVec2 ident = {-(textsize.x)/2, -(textsize.y)/2};
             drawlist->AddText({(pos.x + pos2.x) / 2 + ident.x, (pos.y + pos2.y)/2 + ident.y} , IM_COL32(0,0,0,255), path);
-            // interaction
-            if (ImGui::IsMouseHoveringRect(pos, pos2)){
-                printf("HOVERING\n");
-            }
             i++;
         }
-
+        
         ImGui::End();
     }
 };

@@ -35,7 +35,7 @@ namespace TL_APPLICATION{
         // auto comp = clip->add_component<Transform>();
         // comp->scale = {scale, scale};
         // comp->position = {.5,.5};
-        clip->masterclip = new VideoClip(filepath);
+        clip->masterclip = new VideoClip(file1);
         clip->masterclip->source = file1;
         return clip;
     }

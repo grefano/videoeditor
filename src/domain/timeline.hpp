@@ -20,7 +20,8 @@ struct MasterClip{ // liga o clipe ao mediasource e ao filereader, decide como r
 
 struct VideoClip : public MasterClip{
     VideoReader reader;
-    VideoClip(const char* filepath) : reader(filepath){
+    VideoClip(MediaSource* source) : reader(source->filepath){
+        this->source = source;
     }
     void accept(ClipVisitor* visitor, Clip* clip, Render* render, float rel_ts);
 

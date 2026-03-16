@@ -1,9 +1,7 @@
 #include "shadercomponent.hpp"
 
 void ComponentShader::bind_shader(const char* vs, const char* fs){
-    printf("-- comp bind shader\n");
     this->shader = createShader(vs, fs);
-    printf("--\n");
 }
 
 void ComponentShader::get_tex(GLuint tex, GLuint result_tex, GLuint fbo){

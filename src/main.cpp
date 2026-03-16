@@ -29,7 +29,7 @@ namespace TL_APPLICATION{
     Timeline* tl;
     Clip* add_clip(size_t track, ImVec2 time_tl, const char* filepath){
         MediaSource* file1 = (*mediapool).add_file(filepath);
-        printf(file1->filepath);
+        log(file1->filepath);
         Clip* clip = (*tl).add_clip(track, time_tl.x, time_tl.y);
         float scale = 2;
         // auto comp = clip->add_component<Transform>();
@@ -48,7 +48,7 @@ using namespace TL_APPLICATION;
 // PreviewUI UIpreview2("preview2");
 int main(){
     if (!glfwInit()){
-        printf("%s\n", "falha inicializando glfw");
+        log("%s\n", "falha inicializando glfw");
         return -1;
     }
     
@@ -64,12 +64,12 @@ int main(){
         tl->key_callback(key, action);
     });
     Render render(ImVec2(640, 360));
-    printf("render");
+    log("render");
     Mediapool mediapool;
     TL_APPLICATION::mediapool = &mediapool;
     Import import = {&mediapool};
     
-    printf("mediapool");
+    log("mediapool");
     
     /*
     botao importar
@@ -90,7 +90,7 @@ int main(){
     comp = clip->add_component<Transform>();
     comp->position = {0, 0};
     comp->scale = {1, 1};
-    printf("clip");
+    log("clip");
 
 
     /*
@@ -125,18 +125,18 @@ int main(){
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
         // comp2->position.x -= dt*.001;
-    printf("update");
+    log("update");
 
         tl.update(dt);
         render.update_preview_tex(&tl);
-        printf("draw tl");
+        log("draw tl");
         UIimport.draw();
         UImediapool.draw(&mediapool);
         UItl.draw();
-        // printf("tex = %d\n", tl.playhead_tex);
-    printf("draw preview");
+        // log("tex = %d\n", tl.playhead_tex);
+    log("draw preview");
         UIpreview.draw(&tl, render.playhead_tex, render.preview_dimensions);
-        // printf("DIM %d %d", clip->, clip->h);
+        // log("DIM %d %d", clip->, clip->h);
         ImGui::Image( render.clip_tex, ImVec2(640, 360));
         ImGui::Image( render.clip_result_tex, ImVec2(640, 360));
 

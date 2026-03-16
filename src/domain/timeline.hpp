@@ -35,6 +35,7 @@ struct Clip{
     Clip(float t0, float t1){
         this->tl_time0 = t0;
         this->tl_time1 = t1;
+        this->add_component<Default>();
     }
     ~Clip(){
         delete masterclip;
@@ -46,15 +47,12 @@ struct Clip{
 
 template <typename T>
 T* Clip::add_component(){
-    printf("\n -- add component\n");
     static_assert(std::is_base_of_v<ComponentShader, T>);
 
     
     std::unique_ptr<T> element = std::make_unique<T>();
     T* ptr = element.get();
     shader_components.push_back(std::move(element));
-
-    printf("\n -- \n");
 
     return ptr;
 }

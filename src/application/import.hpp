@@ -11,6 +11,7 @@ class Import{
   void import_filepath(const char* filepath){
     // validar filepath
     // ¿quem valida arquivo? Import ou mediapool
+    
     MediaSource* source = mediapool->add_file(filepath);
     printf("filepath %s\n", filepath);
   }

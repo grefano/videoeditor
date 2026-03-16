@@ -75,13 +75,9 @@ void RenderQuad()
 }
 GLuint createShader(const char* vs, const char* fs)
 {
-    //printf("shader source:\n%s\n", vs);
-    //printf("shader source:\n%s\n", fs);
-    //printf("create shader\n");
     GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex,1,&vs,nullptr);
     glCompileShader(vertex);
-    printf("vertex shader %d\n", vertex);
     //printf("awdawd\n");
     GLint success;
     glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);

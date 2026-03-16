@@ -1,4 +1,5 @@
 #include "timeline.hpp"
+#include "log.hpp"
 /*
 quem store framebuffer?
 - não é o clip pq é objeto de dominio, não deve ser acoplado com o visual
@@ -28,9 +29,9 @@ Clip* Timeline::add_clip(size_t track, float time0, float time1){
 
 
 void Timeline::update(double dt){
-        printf("update\n");
+        log("update\n");
     this->playhead_time += (float)dt;
-    //printf("update %f\n", playhead_time);
+    //log("update %f\n", playhead_time);
     // track de baixo pra cima
     // pra cada track, criar uma lista de clipes na ordem
     // o resultado da iteração vai ser oq? (preciso implementar em Clip)
@@ -46,7 +47,7 @@ void Timeline::key_callback(int key, int action){
     if (key == GLFW_KEY_RIGHT){
         if (action == GLFW_PRESS){
             this->playhead_time += 3.0;
-            ////printf("key press right\n");
+            ////log("key press right\n");
         } else if (action == GLFW_REPEAT){
             this->isPlaying = false;
             this->playhead_time += 1;
@@ -72,12 +73,12 @@ void Timeline::key_callback(int key, int action){
 
     this->isPlaying = wasPlaying;
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS){
-        ////printf("key space\n");
+        ////log("key space\n");
         this->isPlaying = !this->isPlaying;
     }
 }
 
 void VideoClip::accept(ClipVisitor* visitor, Clip* clip, Render* render, float rel_ts){
-    printf("accepted clip t0 %f t1 %f rel_ts %f\n", clip->tl_time0, clip->tl_time1, rel_ts);
+    log("accepted clip t0 %f t1 %f rel_ts %f\n", clip->tl_time0, clip->tl_time1, rel_ts);
     visitor->visit(*this, clip, render, rel_ts);
 }

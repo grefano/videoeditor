@@ -3,8 +3,8 @@
 #include "timeline.hpp"
 #include <functional>
 #include <cstring>
-
-
+#include "log.hpp"
+static bool debug = false;
 struct TimelineUI{
     Timeline* tl;
     ImVec2 view_time_window;
@@ -103,15 +103,15 @@ struct TimelineUI{
             // MediaSource* file1 = (*mediapool).add_file(filepath);
             Clip* clip = tl->add_clip(track, t.x, t.y);
             float scale = 2;
-            auto comp = clip->add_component<Transform>();
-            comp->scale = {1,1};
-            comp->position = {0,0};
+            // auto comp = clip->add_component<Default>();
+            // comp->scale = {1,1};
+            // comp->position = {0,0};
             clip->masterclip = new VideoClip(source);
         }
     };
     Application app;
     void draw(){
-        printf("draw timeline\n");
+        log("draw timeline\n");
         ImGui::Begin("tl");                          
         ImDrawList* drawlist = ImGui::GetWindowDrawList();
         ImVec2 screenpos = ImGui::GetCursorScreenPos();
@@ -120,7 +120,7 @@ struct TimelineUI{
         drawlist->AddRectFilled(screenpos, ImVec2(screenpos.x+this->size.x, screenpos.y+this->size.y), IM_COL32(40, 40, 40, 255));
         int i = 0;
         for(auto& track : (*tl).tracks_){
-            printf("track id %d", track.id);
+            log("track id %d", track.id);
             ImVec2 track_pos = this->get_track_pos(track.id);
             ImVec2 track_size = this->get_track_size(track.id);
             ImVec2 pos =ImVec2(screenpos.x+track_pos.x, screenpos.y+track_pos.y);
@@ -131,10 +131,10 @@ struct TimelineUI{
                 ImVec2(pos.x+track_size.x, pos.y+track_size.y), IM_COL32(80, 80, 100, 255));
             
             if (ImGui::BeginDragDropTarget()){
-                printf("dragged mediasource");
+                log("dragged mediasource");
                 if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MEDIASOURCE")){
                     MediaSource* source = static_cast<MediaSource*>(payload->Data);
-                    printf("dragged mediasource %s\n", source->filepath);
+                    log("dragged mediasource %s\n", source->filepath);
                     
                     float rel_x = cursorpos.x - pos.x;
 
@@ -145,8 +145,8 @@ struct TimelineUI{
                 ImGui::EndDragDropTarget();
             }
             for(auto& clip : track.clips){
-                printf("track pos %f", track_pos.y);
-                printf("clip t0 %f t1 %f\n", (*clip).tl_time0, (*clip).tl_time1);
+                log("track pos %f", track_pos.y);
+                log("clip t0 %f t1 %f\n", (*clip).tl_time0, (*clip).tl_time1);
                 ImVec2 pos = this->get_clip_pos(clip.get(), &track, tl);
                 ImVec2 size = this->get_clip_size(clip.get(), &track, tl);
                 ImVec2 realpos = ImVec2(screenpos.x+pos.x, screenpos.y+pos.y);
@@ -177,7 +177,7 @@ struct TimelineUI{
         float headx = screenpos.x + get_x(tl->playhead_time);
         drawlist->AddRectFilled(ImVec2(headx, screenpos.y), ImVec2(headx+5, screenpos.y+this->size.y), IM_COL32(0,255,0,255));
         ImGui::End();
-        printf("end draw timeline\n");
+        log("end draw timeline\n");
     }
 
 };
@@ -189,7 +189,7 @@ struct PreviewUI{
         this->name = name; 
     }
     void draw(Timeline* tl, GLuint tex, ImVec2 dim){
-        printf("draw preview %d\n", tex);
+        log("draw preview %d\n", tex);
         assert(tex != 0);
         static double lasttime = 0;
         double now = glfwGetTime();
@@ -208,7 +208,7 @@ struct PreviewUI{
 
         ImGui::End();
 
-        printf("end draw preview\n");
+        log("end draw preview\n");
 
     }
 };
@@ -234,7 +234,7 @@ struct MediapoolUI{
         int source_size = 200;
         int source_sep = 20;
         
-        ImGui::Begin("mediapool", NULL, ImGuiWindowFlags_NoMove);  
+        ImGui::Begin("mediapool", NULL, NULL);  
         ImVec2 screenpos = ImGui::GetCursorScreenPos();
         ImVec2 regionavail = ImGui::GetContentRegionAvail();
         int qtd_sources =  (regionavail.x-source_sep) / (source_sep+source_size);
@@ -245,7 +245,7 @@ struct MediapoolUI{
         int i = 0;
         for(auto& source : pool->get_pool()){
             const char* path = source.get()->filepath;
-            printf("path %p %p\n", path, path + std::strlen(path));
+            log("path %p %p\n", path, path + std::strlen(path));
             
             ImVec2 ipos = {i % qtd_sources, (int)(i / qtd_sources)};
             ImVec2 pos = {screenpos.x + ipos.x * (source_sep + source_size), screenpos.y + ipos.y * (source_sep + source_size)};

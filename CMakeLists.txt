@@ -16,6 +16,6 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(FFMPEG REQUIRED libavcodec libavformat libavutil libswscale)
 find_package(glfw3 REQUIRED)
 
-target_include_directories(editor PRIVATE src src/domain src/application src/infrastructure ${MSYS2}/include vendor/ ${DIR_IMGUI})
+target_include_directories(editor PRIVATE src src/debug src/domain src/application src/infrastructure ${MSYS2}/include vendor/ ${DIR_IMGUI})
 
 target_link_libraries(editor PRIVATE ${FFMPEG_LIBRARIES} glfw3)

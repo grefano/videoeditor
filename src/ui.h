@@ -101,12 +101,16 @@ struct TimelineUI{
     struct Application{
         virtual void soltar_source(Timeline* tl, size_t track, MediaSource* source, ImVec2 t){
             // MediaSource* file1 = (*mediapool).add_file(filepath);
+            VideoClip* masterclip;
+            try {
+                masterclip = new VideoClip(source);
+            } catch (const std::exception& e){
+                printf("video inválido\n");
+                return;
+            }
+
             Clip* clip = tl->add_clip(track, t.x, t.y);
-            float scale = 2;
-            // auto comp = clip->add_component<Default>();
-            // comp->scale = {1,1};
-            // comp->position = {0,0};
-            clip->masterclip = new VideoClip(source);
+            clip->masterclip = masterclip;
         }
     };
     Application app;
@@ -213,16 +217,22 @@ struct PreviewUI{
     }
 };
 
+
 struct ImportUI{
     std::function<void(char*)> cb_import;
+    char filepath[30] = "";
     void draw(){
-        char* filepath;
 
         ImGui::Begin("import");                          
-        ImGui::InputText("filepath", filepath, 10, ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_EscapeClearsAll);
+        ImGui::InputText("filepath", filepath, 30, ImGuiInputTextFlags_CharsNoBlank);
         if (ImGui::Button("import file", {50, 50})){
             assert(cb_import);
-            cb_import(filepath);
+            try{
+
+                cb_import(filepath);
+            } catch (const std::exception& e){
+                std::cout << e.what() << "\0";
+            }
         }
         ImGui::End();
     }

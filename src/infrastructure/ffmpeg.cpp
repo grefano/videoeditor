@@ -31,18 +31,16 @@ bool VideoReader::jump_to_ts(float ts_sec, double* pt_seconds, int64_t* pts){
 }
 
 bool VideoReader::file_open(const char* filename){
-    bool debug_print = false;
+    bool debug_print = true;
     this->state.av_format_context = avformat_alloc_context();
     if (!this->state.av_format_context){
-        if (debug_print) 
-            printf("nao criou avformatcontext\n");
-        return 0;
+        throw std::runtime_error("não criou avformatcontext");
+        return false;
     }
 
     if (avformat_open_input(&this->state.av_format_context, filename, NULL, NULL) != 0){
-        if (debug_print) 
-            printf("nao abriu video\n");
-        return 0;
+        throw std::runtime_error("nao abriu video\n");
+        return false;
     }
     const AVCodecParameters* av_codec_params = nullptr;
     const AVCodec* av_codec = nullptr;
@@ -60,42 +58,36 @@ bool VideoReader::file_open(const char* filename){
     }
 
     if (this->state.video_stream_index == -1){
-        if (debug_print) 
-            printf("nao achou uma video stream válida\n");
+        throw std::runtime_error("nao achou uma video stream válida\n");
         return 0;
     }
 
     this->state.av_codec_context = avcodec_alloc_context3(av_codec);
     if(!this->state.av_codec_context){
-        if (debug_print) 
-            printf("nao criou avcodeccontext\n");
+        throw std::runtime_error("nao criou avcodeccontext\n");
         return 0;
     }
 
     if(avcodec_parameters_to_context(this->state.av_codec_context, av_codec_params) < 0){
-        if (debug_print) 
-            printf("nao iniciou avcodeccontext\n");
+        throw std::runtime_error("nao iniciou avcodeccontext\n");
         return 0;
     }
 
     if(avcodec_open2(this->state.av_codec_context, av_codec, NULL) < 0){
-        if (debug_print) 
-            printf("nao abriu codec\n");
+        throw std::runtime_error("nao abriu codec\n");
         return 0;
     }
     
     this->state.av_frame = av_frame_alloc();
     if(!this->state.av_frame){
-        if (debug_print) 
-            printf("nao alocou avframe\n");
+        throw std::runtime_error("nao alocou avframe\n");
         return 0;
     }
     
     this->state.frame_buffer = new uint8_t[this->state.av_codec_context->width * this->state.av_codec_context->height * 4];
     this->state.av_packet = av_packet_alloc();
     if (!this->state.av_packet){
-        if (debug_print) 
-            printf("nao alocou avpacket\n");
+        throw std::runtime_error("nao alocou avpacket\n");
         return 0;
     }
 // ////printf("width: %d, height: %d, pix_fmt codec_params: %d\n", 

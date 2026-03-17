@@ -9,7 +9,7 @@ clip, videoref
 get_clip_frame(timestamp, clip, videoref): uint8_t
 get_clip_tex(timestamp, clip, videoref): 
 */
-static bool debug = false;
+static bool debug = true;
 
 Clip* Timeline::add_clip(size_t track, float time0, float time1){
     int _id = 0;
@@ -81,4 +81,15 @@ void Timeline::key_callback(int key, int action){
 void VideoClip::accept(ClipVisitor* visitor, Clip* clip, Render* render, float rel_ts){
     log("accepted clip t0 %f t1 %f rel_ts %f\n", clip->tl_time0, clip->tl_time1, rel_ts);
     visitor->visit(*this, clip, render, rel_ts);
+}
+
+bool VideoClip::can_tl_move(ImVec2 disp, ImVec2 time){
+    return disp.y + time.y > disp.x + time.x; // !!!
+    double dur = static_cast<double>(this->reader.state.av_format_context->duration) / AV_TIME_BASE;
+    float durwant = (time.y+disp.y -time.x-disp.x);
+    log("avdur %"PRIu64" dur %f want %f base %d\n", this->reader.state.av_format_context->duration, dur, durwant, this->reader.get_time_base());
+    if (durwant < dur){
+        return true;
+    }
+    return false;
 }

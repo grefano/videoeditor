@@ -53,7 +53,7 @@ struct TimelineUI{
         return ImVec2(0, id*px_per_track);
     }
     ImVec2 get_track_size(int id){
-        return ImVec2(this->size.x, (id+1)*px_per_track);
+        return ImVec2(this->size.x, px_per_track);
     }
     ImVec2 get_clip_pos(Clip* clip, Track* track, Timeline* tl){
         return ImVec2( get_x(clip->tl_time0), get_track_pos(track->id).y);
@@ -108,14 +108,11 @@ struct TimelineUI{
         void drag(Clip* clip, float disp){
             if (drag_clip_mode == NONE) { return; }
             if (drag_clip_mode == LEFT){
-                clip->tl_time0 += disp;
-
+                clip->tl_move({disp, 0});
             } else if (drag_clip_mode == RIGHT){
-                clip->tl_time1 += disp;
-
+                clip->tl_move({0, disp});
             } else if (drag_clip_mode == MIDDLE){
-                clip->tl_time0 += disp;
-                clip->tl_time1 += disp;
+                clip->tl_move({disp, disp});
             }
         }
         
@@ -129,15 +126,13 @@ struct TimelineUI{
         ImVec2 cursorpos = ImGui::GetMousePos();
         this->set_size(ImGui::GetWindowWidth(), 300);
         drawlist->AddRectFilled(screenpos, ImVec2(screenpos.x+this->size.x, screenpos.y+this->size.y), IM_COL32(40, 40, 40, 255));
-        int i = 0;
         for(auto& track : (*tl).tracks_){
             log("track id %d", track.id);
             ImVec2 track_pos = this->get_track_pos(track.id);
             ImVec2 track_size = this->get_track_size(track.id);
             ImVec2 pos =ImVec2(screenpos.x+track_pos.x, screenpos.y+track_pos.y);
             ImGui::SetCursorScreenPos(pos);
-            ImGui::InvisibleButton(("soltar " + std::to_string(i)).c_str(), track_size, 0);
-            i++;
+            ImGui::InvisibleButton(("soltar " + std::to_string(track.id)).c_str(), track_size, 0);
             drawlist->AddRectFilled(pos,
                 ImVec2(pos.x+track_size.x, pos.y+track_size.y), IM_COL32(80, 80, 100, 255));
             
@@ -165,55 +160,54 @@ struct TimelineUI{
                 ImVec2 realpos2 = ImVec2(realpos.x+size.x,realpos.y+size.y);
                 auto col = IM_COL32(0, 0, 255, 255);
                 if (app.drag_clip_mode == app.NONE){
-                    if(ImGui::IsMouseHoveringRect(realpos, realpos2)){
+                    bool hovering = false;
+                    if (isHoveringClipSide(realpos, realpos2.y, cursorpos)){
+                        app.drag_clip_mode = app.LEFT;
+                        hovering = true;
+                        drawClipSide(realpos, realpos2, cursorpos, drawlist);
+                    } else if (isHoveringClipSide({realpos2.x, realpos.y}, realpos2.y,cursorpos)){
+                        app.drag_clip_mode = app.RIGHT;
+                        hovering = true;
+                        drawClipSide({realpos2.x, realpos.y}, realpos2, cursorpos, drawlist);
+                    } else if(ImGui::IsMouseHoveringRect(realpos, realpos2)){
+                        app.drag_clip_mode = app.MIDDLE;
+                        hovering = true;
                         col = IM_COL32(100,0,255,255);
                         int growstroke = 5;
                         realpos.x -= growstroke;
                         realpos.y -= growstroke;
                         realpos2.x += growstroke;
                         realpos2.y += growstroke;
-                        if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)){
-                            selected_clip = ptr_clip;
-                            selected_clip_hover_rel_t0 = selected_clip->tl_time0;
-                        }
-                    }
-                    
-                    if (selected_clip == ptr_clip){
-                        col = IM_COL32(0,100,100,255);
-                    }
 
+                    }
+                    if(hovering && ImGui::IsMouseClicked(ImGuiMouseButton_Left)){
+                        selected_clip = ptr_clip;
+                        selected_clip_hover_rel_t0 = selected_clip->tl_time0;
+                    }
                 }
+                    
+                if (selected_clip == ptr_clip){
+                    col = IM_COL32(0,100,100,255);
+                }
+
                 drawlist->AddRectFilled(realpos, realpos2, col);
-                drawClipSide(realpos, realpos2, cursorpos, drawlist);
-                drawClipSide({realpos2.x, realpos.y}, realpos2, cursorpos, drawlist);
                 
                 ImGui::PushID(ptr_clip);
                 ImGui::SetCursorScreenPos(realpos);
                 ImGui::InvisibleButton("##clip", size);
                 ImGui::PopID();
-
-
-
-                if (selected_clip == ptr_clip){
-                    float disp = ImGui::GetIO().MouseDelta.x / px_per_sec;
-                    if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)){
-                        if (app.drag_clip_mode == app.NONE){
-                            
-                            if (isHoveringClipSide(realpos, realpos2.y, cursorpos)){
-                                app.drag_clip_mode = app.LEFT;
-                            } else if (isHoveringClipSide({realpos2.x, realpos.y}, realpos2.y,cursorpos)){
-                                app.drag_clip_mode = app.RIGHT;
-                            } else {
-                                app.drag_clip_mode = app.MIDDLE;
-                            }
-                        }
-                    } else {
-                        app.drag_clip_mode = app.NONE;
-                    }
-                    app.drag(ptr_clip, disp);
-                }
-                // drawClipSide({realpos2.x, realpos.y}, realpos2, cursorpos, drawlist);
                 
+                
+                
+                if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)){
+                    if (selected_clip == ptr_clip){
+                        float disp = ImGui::GetIO().MouseDelta.x / px_per_sec;
+                        app.drag(ptr_clip, disp);
+                        
+                    }
+                } else {
+                    app.drag_clip_mode = app.NONE;
+                }
             }
         }
         float headx = screenpos.x + get_x(tl->playhead_time);

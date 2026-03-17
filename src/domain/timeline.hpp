@@ -16,6 +16,7 @@ struct ClipVisitor{
 struct MasterClip{ // liga o clipe ao mediasource e ao filereader, decide como renderização acontece
     MediaSource* source;
     virtual void accept(ClipVisitor* visitor, Clip* clip, Render* render, float rel_ts) = 0;
+    virtual bool can_tl_move(ImVec2 disp, ImVec2 time) = 0;
 };
 
 struct VideoClip : public MasterClip{
@@ -23,8 +24,8 @@ struct VideoClip : public MasterClip{
     VideoClip(MediaSource* source) : reader(source->filepath){
         this->source = source;
     }
-    void accept(ClipVisitor* visitor, Clip* clip, Render* render, float rel_ts);
-
+    void accept(ClipVisitor* visitor, Clip* clip, Render* render, float rel_ts) override;
+    bool can_tl_move(ImVec2 disp, ImVec2 time) override;
 };
 
 struct Clip{
@@ -40,7 +41,13 @@ struct Clip{
     ~Clip(){
         delete masterclip;
     }
+    void tl_move(ImVec2 disp){
+        if (masterclip->can_tl_move(disp, {tl_time0, tl_time1})){
+            tl_time0 += disp.x;
+            tl_time1 += disp.y;
 
+        }
+    }
     template <typename T>
     T* add_component();
 };

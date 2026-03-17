@@ -88,17 +88,10 @@ struct TimelineUI{
 
     }
 
-    void update_interaction(){
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)){
-            selected_clip = nullptr;
-        }
-        return;
-        if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)){
-            
-        }
-    }
 
     struct Application{
+        enum DRAG_CLIP{ NONE, LEFT, RIGHT, MIDDLE };
+        DRAG_CLIP drag_clip_mode = NONE;
         virtual void soltar_source(Timeline* tl, size_t track, MediaSource* source, ImVec2 t){
             // MediaSource* file1 = (*mediapool).add_file(filepath);
             VideoClip* masterclip;
@@ -112,6 +105,20 @@ struct TimelineUI{
             Clip* clip = tl->add_clip(track, t.x, t.y);
             clip->masterclip = masterclip;
         }
+        void drag(Clip* clip, float disp){
+            if (drag_clip_mode == NONE) { return; }
+            if (drag_clip_mode == LEFT){
+                clip->tl_time0 += disp;
+
+            } else if (drag_clip_mode == RIGHT){
+                clip->tl_time1 += disp;
+
+            } else if (drag_clip_mode == MIDDLE){
+                clip->tl_time0 += disp;
+                clip->tl_time1 += disp;
+            }
+        }
+        
     };
     Application app;
     void draw(){
@@ -157,21 +164,24 @@ struct TimelineUI{
                 ImVec2 realpos = ImVec2(screenpos.x+pos.x, screenpos.y+pos.y);
                 ImVec2 realpos2 = ImVec2(realpos.x+size.x,realpos.y+size.y);
                 auto col = IM_COL32(0, 0, 255, 255);
-                if(ImGui::IsMouseHoveringRect(realpos, realpos2)){
-                    col = IM_COL32(100,0,255,255);
-                    int growstroke = 5;
-                    realpos.x -= growstroke;
-                    realpos.y -= growstroke;
-                    realpos2.x += growstroke;
-                    realpos2.y += growstroke;
-                    if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)){
-                        selected_clip = ptr_clip;
-                        selected_clip_hover_rel_t0 = selected_clip->tl_time0;
+                if (app.drag_clip_mode == app.NONE){
+                    if(ImGui::IsMouseHoveringRect(realpos, realpos2)){
+                        col = IM_COL32(100,0,255,255);
+                        int growstroke = 5;
+                        realpos.x -= growstroke;
+                        realpos.y -= growstroke;
+                        realpos2.x += growstroke;
+                        realpos2.y += growstroke;
+                        if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)){
+                            selected_clip = ptr_clip;
+                            selected_clip_hover_rel_t0 = selected_clip->tl_time0;
+                        }
                     }
-                }
-                
-                if (selected_clip == ptr_clip){
-                    col = IM_COL32(0,100,100,255);
+                    
+                    if (selected_clip == ptr_clip){
+                        col = IM_COL32(0,100,100,255);
+                    }
+
                 }
                 drawlist->AddRectFilled(realpos, realpos2, col);
                 drawClipSide(realpos, realpos2, cursorpos, drawlist);
@@ -182,12 +192,25 @@ struct TimelineUI{
                 ImGui::InvisibleButton("##clip", size);
                 ImGui::PopID();
 
+
+
                 if (selected_clip == ptr_clip){
+                    float disp = ImGui::GetIO().MouseDelta.x / px_per_sec;
                     if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)){
-                        float disp = ImGui::GetIO().MouseDelta.x / px_per_sec;
-                        ptr_clip->tl_time0 += disp;
-                        ptr_clip->tl_time1 += disp;
+                        if (app.drag_clip_mode == app.NONE){
+                            
+                            if (isHoveringClipSide(realpos, realpos2.y, cursorpos)){
+                                app.drag_clip_mode = app.LEFT;
+                            } else if (isHoveringClipSide({realpos2.x, realpos.y}, realpos2.y,cursorpos)){
+                                app.drag_clip_mode = app.RIGHT;
+                            } else {
+                                app.drag_clip_mode = app.MIDDLE;
+                            }
+                        }
+                    } else {
+                        app.drag_clip_mode = app.NONE;
                     }
+                    app.drag(ptr_clip, disp);
                 }
                 // drawClipSide({realpos2.x, realpos.y}, realpos2, cursorpos, drawlist);
                 

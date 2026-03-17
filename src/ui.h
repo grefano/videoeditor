@@ -149,10 +149,11 @@ struct TimelineUI{
                 ImGui::EndDragDropTarget();
             }
             for(auto& clip : track.clips){
+                Clip* ptr_clip = clip.get();
                 log("track pos %f", track_pos.y);
                 log("clip t0 %f t1 %f\n", (*clip).tl_time0, (*clip).tl_time1);
-                ImVec2 pos = this->get_clip_pos(clip.get(), &track, tl);
-                ImVec2 size = this->get_clip_size(clip.get(), &track, tl);
+                ImVec2 pos = this->get_clip_pos(ptr_clip, &track, tl);
+                ImVec2 size = this->get_clip_size(ptr_clip, &track, tl);
                 ImVec2 realpos = ImVec2(screenpos.x+pos.x, screenpos.y+pos.y);
                 ImVec2 realpos2 = ImVec2(realpos.x+size.x,realpos.y+size.y);
                 auto col = IM_COL32(0, 0, 255, 255);
@@ -164,16 +165,30 @@ struct TimelineUI{
                     realpos2.x += growstroke;
                     realpos2.y += growstroke;
                     if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)){
-                        selected_clip = clip.get();
+                        selected_clip = ptr_clip;
                         selected_clip_hover_rel_t0 = selected_clip->tl_time0;
                     }
                 }
-                if (selected_clip == clip.get()){
+                
+                if (selected_clip == ptr_clip){
                     col = IM_COL32(0,100,100,255);
                 }
                 drawlist->AddRectFilled(realpos, realpos2, col);
                 drawClipSide(realpos, realpos2, cursorpos, drawlist);
                 drawClipSide({realpos2.x, realpos.y}, realpos2, cursorpos, drawlist);
+                
+                ImGui::PushID(ptr_clip);
+                ImGui::SetCursorScreenPos(realpos);
+                ImGui::InvisibleButton("##clip", size);
+                ImGui::PopID();
+
+                if (selected_clip == ptr_clip){
+                    if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)){
+                        float disp = ImGui::GetIO().MouseDelta.x / px_per_sec;
+                        ptr_clip->tl_time0 += disp;
+                        ptr_clip->tl_time1 += disp;
+                    }
+                }
                 // drawClipSide({realpos2.x, realpos.y}, realpos2, cursorpos, drawlist);
                 
             }
@@ -219,17 +234,20 @@ struct PreviewUI{
 
 
 struct ImportUI{
-    std::function<void(char*)> cb_import;
     char filepath[30] = "";
+    struct Application{
+        std::function<void(char*)> import;
+
+    };
+    Application app;
     void draw(){
 
         ImGui::Begin("import");                          
         ImGui::InputText("filepath", filepath, 30, ImGuiInputTextFlags_CharsNoBlank);
         if (ImGui::Button("import file", {50, 50})){
-            assert(cb_import);
+            assert(app.import);
             try{
-
-                cb_import(filepath);
+                app.import(filepath);
             } catch (const std::exception& e){
                 std::cout << e.what() << "\0";
             }

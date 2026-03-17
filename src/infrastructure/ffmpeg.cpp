@@ -1,5 +1,4 @@
 #include "ffmpeg.h"
-// cmake .. -G "MinGW Makefiles" -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
 
 VideoReader::VideoReader(const char* filepath){
     ////printf("video reader constructed\n");

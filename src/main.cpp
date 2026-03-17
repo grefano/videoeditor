@@ -93,27 +93,13 @@ int main(){
     log("clip");
 
 
-    /*
-    mediapool.addfile("wadoiwajd.mp4")
-    tl.add(videoref, trackid=0, t0=5, t1=10)
-    */
-
-
-    // Transform* comp2= clip2->add_component<Transform>();
-    // comp2->position = {.5, .2};
-    // comp2->scale = {.8, 1};
-
-    // Clip* clip = tl.add_clip_video(1, "teste.mp4", 0, 30);
-    // Transform* comp= clip->add_component<Transform>();
-    // comp->position = {0, 0};
-    // comp->scale = {1,1};
     TimelineUI UItl(&tl);
     PreviewUI UIpreview;
     ImportUI UIimport;
+    UIimport.app.import = [&import](char* filepath){ import.import_filepath(filepath); };
     MediapoolUI UImediapool;
 
 
-    UIimport.cb_import = [&import](char* filepath){ import.import_filepath(filepath); };
 
     double lasttime = glfwGetTime();
     while (!glfwWindowShouldClose(glfw.window_)) {

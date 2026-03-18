@@ -13,6 +13,8 @@ GLuint create_texture(){
 }
 
 void image_to_tex(GLuint tex, uint8_t* buffer, int w, int h){
+  PROFILE_FUNCTION();
+
     // glGenTextures(1, tex);
     glBindTexture(GL_TEXTURE_2D, tex);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

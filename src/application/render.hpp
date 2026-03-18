@@ -1,6 +1,6 @@
 #pragma once
 #include "timelinewalker.hpp"
-
+#include "profile.hpp"
 
 namespace ClipReadWrite{
     void get_clip_tex_result(std::list<std::unique_ptr<ComponentShader>>* components, GLuint raw_tex, GLuint result_tex, GLuint fbo);
@@ -25,6 +25,7 @@ class Render{
 
   void init_shader();
   void update_preview_tex(Timeline*);
+  void render();
   Render(ImVec2 preview_dimensions);
   ~Render();
   void dispatch(Clip* clip, VideoClip* masterclip, float rel_ts);

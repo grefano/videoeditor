@@ -7,6 +7,7 @@
 #include <string>
 #include <iterator>
 #include <iostream>
+#include "profile.hpp"
 
 GLuint create_texture();
 void image_to_tex(GLuint tex, uint8_t* buffer, int w, int h);

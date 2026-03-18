@@ -4,6 +4,8 @@
 static bool debug = false;
 
 void ClipReadWrite::get_clip_tex_result(std::list<std::unique_ptr<ComponentShader>>* components, GLuint raw_tex, GLuint result_tex, GLuint fbo){
+  PROFILE_FUNCTION();
+
   for(auto& compptr : *components){
     log("it comp\n");
     log("COMP\n");
@@ -13,6 +15,7 @@ void ClipReadWrite::get_clip_tex_result(std::list<std::unique_ptr<ComponentShade
 }
 
 void ClipReadWrite::update_image(VideoReader* reader, float ts){
+  PROFILE_FUNCTION();
   double pts_in_sec = (double)reader->pts * reader->get_time_base();
   double diff = (double)ts - pts_in_sec;
       log("pts in sec %f time base %f pts %d\n", pts_in_sec, reader->get_time_base(), reader->pts);
@@ -58,6 +61,7 @@ Render::~Render(){
   glDeleteProgram(this->shd_overlap);
 }
 void Render::update_preview_tex(Timeline* tl){
+  PROFILE_FUNCTION();
   static double then = 0;
   double now = glfwGetTime();
   if (now - then < 1.0f/30.0f){
@@ -93,7 +97,31 @@ if (debug){      log("textures clip %d clip res %d playhead %d\n fbo %d\n", this
   };
 
 }
+// void Render::render(){
+
+//   ImVec2 dim = {640, 360};
+//   std::vector<uint8_t> pixels(dim.x * dim.y * 4);
+//   glReadPixels(0,0,640,360,GL_RGBA,GL_UNSIGNED_BYTE, pixels.data());
+
+//   SwsContext* sws = sws_getContext(
+//     dim.x, dim.y, AV_PIX_FMT_RGBA,
+//     dim.x, dim.y, AV_PIX_FMT_YUV420P,
+//     SWS_BILINEAR, nullptr, nullptr, nullptr
+
+//   );
+//   // sws_scale(sws, )
+//   AVCodec* codec = avcodec_find_encoder(AV_CODEC_ID_H264);
+//   AVCodecContext* ctx = avcodec_alloc_context3(codec);
+//   ctx->width = dim.x;
+//   ctx->height = dim.y;
+//   ctx->time_base = {1, 60};
+//   ctx->framerate = {60, 1};
+//   ctx->pix_fmt = AV_PIX_FMT_YUV420P;
+//   avcodec_open2
+// }
 void RenderClipVisitor::visit(VideoClip& masterclip, Clip* clip, Render* render, float rel_ts){
+  PROFILE_FUNCTION();
+
   log("visit VIDEOCLIP\n");
   log("source path %s\n t0 %f t1 %f\n", masterclip.source->filepath, clip->tl_time0, clip->tl_time1);
 

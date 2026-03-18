@@ -30,6 +30,7 @@ bool VideoReader::jump_to_ts(float ts_sec, double* pt_seconds, int64_t* pts){
 }
 
 bool VideoReader::file_open(const char* filename){
+    PROFILE_FUNCTION();
     bool debug_print = true;
     this->state.av_format_context = avformat_alloc_context();
     if (!this->state.av_format_context){

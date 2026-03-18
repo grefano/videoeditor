@@ -1,5 +1,6 @@
 #pragma once
 #include "timeline.hpp"
+#include "profile.hpp"
 
 struct Timeline;
 

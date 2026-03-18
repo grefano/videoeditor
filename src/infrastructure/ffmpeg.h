@@ -1,6 +1,7 @@
 #pragma once
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "profile.hpp"
 extern "C"{
     #include <libavcodec/avcodec.h>
     #include <libavformat/avformat.h>

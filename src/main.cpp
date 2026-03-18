@@ -56,6 +56,9 @@ int main(){
     Imgui imgui(glfw.window_);
     
     gladLoadGL();
+    Instrumentor::Get().BeginSession("ffmpeg");
+    InstrumentationTimer profile_before = {"before-loop"};
+
     Timeline tl;
     TL_APPLICATION::tl = &tl;
     glfwSetWindowUserPointer(glfw.window_, &tl);
@@ -100,7 +103,7 @@ int main(){
     MediapoolUI UImediapool;
 
 
-
+    profile_before.Stop();
     double lasttime = glfwGetTime();
     while (!glfwWindowShouldClose(glfw.window_)) {
         double now = glfwGetTime();
@@ -140,6 +143,8 @@ int main(){
         glfwPollEvents();
         
     }
+
+    Instrumentor::Get().EndSession();
 
     return 0;
 }

@@ -1,8 +1,8 @@
 #include "timelinewalker.hpp"
-
 static bool debug = false;
 
 void WalkerTimeline::walk(Timeline* tl, std::list<Clip*>* out_clips){
+    PROFILE_FUNCTION();
     if (debug)
         printf("walk tl\n");
 

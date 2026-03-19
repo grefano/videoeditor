@@ -1,6 +1,5 @@
 #include "render.hpp"
 #include "log.hpp"
-
 static bool debug = false;
 
 void ClipReadWrite::get_clip_tex_result(std::list<std::unique_ptr<ComponentShader>>* components, GLuint raw_tex, GLuint result_tex, GLuint fbo){
@@ -75,17 +74,15 @@ void Render::update_preview_tex(Timeline* tl){
   int i = 0;
   
   for (Clip* clip : clips){
-      if (debug) {log("clip t0 %f t1 %f\n", clip->tl_time0, clip->tl_time1); }
+      log("clip t0 %f t1 %f\n", clip->tl_time0, clip->tl_time1);
       float rel_ts = tl->playhead_time - clip->tl_time0;
       if (tl->playhead_time < clip->tl_time0 || tl->playhead_time > clip->tl_time1){
         continue;
       }
 
-if (debug){      log("textures clip %d clip res %d playhead %d\n fbo %d\n", this->clip_tex, this->clip_result_tex, this->playhead_tex, this->fbo);
-}      
-      clip->masterclip->accept(&this->clipVisitor,clip, this, rel_ts);
-
-      // dispatch(clip, clip->masterclip, rel_ts);
+      log("textures clip %d clip res %d playhead %d\n fbo %d\n", this->clip_tex, this->clip_result_tex, this->playhead_tex, this->fbo);
+   
+      std::visit([this, clip, rel_ts](auto master){ this->get_tex(clip, master, rel_ts); }, clip->masterclip);
 
       if (i == 0) {
           overlap_textures(this->clip_result_tex, this->clip_result_tex, this->playhead_tex, this->fbo, this->shd_overlap);
@@ -95,9 +92,21 @@ if (debug){      log("textures clip %d clip res %d playhead %d\n fbo %d\n", this
       }
       i++;
   };
+}
+void Render::get_tex(Clip* clip, VideoClip* masterclip, float rel_ts){
+    PROFILE_FUNCTION();
+
+  log("visit VIDEOCLIP\n");
+  log("source path %s\n t0 %f t1 %f\n", masterclip->source->filepath, clip->tl_time0, clip->tl_time1);
+
+  VideoReader* reader = &masterclip->reader;
+  ClipReadWrite::update_image(reader, rel_ts);
+  log("w %f h %f\n", reader->w, reader->h);
+  log("textures clip %d clip res %d playhead %d\n fbo %d\n", this->clip_tex, this->clip_result_tex, this->playhead_tex, this->fbo);
+  image_to_tex(this->clip_tex, reader->state.frame_buffer, reader->w, reader->h);
+  ClipReadWrite::get_clip_tex_result(&clip->shader_components, this->clip_tex, this->clip_result_tex, this->fbo);
 
 }
-// void Render::render(){
 
 //   ImVec2 dim = {640, 360};
 //   std::vector<uint8_t> pixels(dim.x * dim.y * 4);
@@ -119,17 +128,3 @@ if (debug){      log("textures clip %d clip res %d playhead %d\n fbo %d\n", this
 //   ctx->pix_fmt = AV_PIX_FMT_YUV420P;
 //   avcodec_open2
 // }
-void RenderClipVisitor::visit(VideoClip& masterclip, Clip* clip, Render* render, float rel_ts){
-  PROFILE_FUNCTION();
-
-  log("visit VIDEOCLIP\n");
-  log("source path %s\n t0 %f t1 %f\n", masterclip.source->filepath, clip->tl_time0, clip->tl_time1);
-
-VideoReader* reader = &masterclip.reader;
-  ClipReadWrite::update_image(reader, rel_ts);
-  log("w %f h %f\n", reader->w, reader->h);
-  log("textures clip %d clip res %d playhead %d\n fbo %d\n", render->clip_tex, render->clip_result_tex, render->playhead_tex, render->fbo);
- image_to_tex(render->clip_tex, reader->state.frame_buffer, reader->w, reader->h);
-  ClipReadWrite::get_clip_tex_result(&clip->shader_components, render->clip_tex, render->clip_result_tex, render->fbo);
-
-}

@@ -7,16 +7,15 @@
 #include <GLFW/glfw3.h>
 #include <memory>
 #include <imgui.h>
+#include <variant>
+#include <functional>
 class Render;
 struct VideoClip;
 struct Clip;
-struct ClipVisitor{
-    virtual void visit(VideoClip& masterclip, Clip* clip, Render* render, float rel_ts) = 0;
-};
 struct MasterClip{ // liga o clipe ao mediasource e ao filereader, decide como renderização acontece
     MediaSource* source;
-    virtual void accept(ClipVisitor* visitor, Clip* clip, Render* render, float rel_ts) = 0;
     virtual bool can_tl_move(ImVec2 disp, ImVec2 time) = 0;
+    virtual void get_tex(std::function<void(Clip*, MasterClip*, float)> get_tex, Clip* clip, float rel_ts) = 0;
 };
 
 struct VideoClip : public MasterClip{
@@ -24,14 +23,15 @@ struct VideoClip : public MasterClip{
     VideoClip(MediaSource* source) : reader(source->filepath){
         this->source = source;
     }
-    void accept(ClipVisitor* visitor, Clip* clip, Render* render, float rel_ts) override;
+    void get_tex(std::function<void(Clip*, MasterClip*, float)> get_tex, Clip* clip, float rel_ts) override;
+
     bool can_tl_move(ImVec2 disp, ImVec2 time) override;
 };
-
+using VariantMasterClip = std::variant<VideoClip*>;
 struct Clip{
     float tl_time0;
     float tl_time1;
-    MasterClip* masterclip;
+    VariantMasterClip masterclip;
     std::list<std::unique_ptr<ComponentShader>> shader_components;
     Clip(float t0, float t1){
         this->tl_time0 = t0;
@@ -39,14 +39,21 @@ struct Clip{
         this->add_component<Default>();
     }
     ~Clip(){
-        delete masterclip;
+        std::visit([](auto ptr){delete ptr; }, masterclip);
     }
     void tl_move(ImVec2 disp){
-        if (masterclip->can_tl_move(disp, {tl_time0, tl_time1})){
+
+        bool canmove = std::visit([this, disp](auto master){ 
+            return master->can_tl_move(disp, {this->tl_time0, this->tl_time1});
+        }, masterclip);
+        if (canmove){
             tl_time0 += disp.x;
             tl_time1 += disp.y;
 
         }
+        // if (masterclip.can_tl_move(disp, {tl_time0, tl_time1})){
+
+        // }
     }
     template <typename T>
     T* add_component();

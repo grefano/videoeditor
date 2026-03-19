@@ -78,10 +78,10 @@ void Timeline::key_callback(int key, int action){
     }
 }
 
-void VideoClip::accept(ClipVisitor* visitor, Clip* clip, Render* render, float rel_ts){
-    log("accepted clip t0 %f t1 %f rel_ts %f\n", clip->tl_time0, clip->tl_time1, rel_ts);
-    visitor->visit(*this, clip, render, rel_ts);
+void VideoClip::get_tex(std::function<void(Clip*, MasterClip*, float)> get_tex, Clip* clip, float rel_ts){
+    get_tex(clip, this, rel_ts);
 }
+
 
 bool VideoClip::can_tl_move(ImVec2 disp, ImVec2 time){
     return disp.y + time.y > disp.x + time.x; // !!!

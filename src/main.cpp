@@ -36,7 +36,7 @@ namespace TL_APPLICATION{
         // comp->scale = {scale, scale};
         // comp->position = {.5,.5};
         clip->masterclip = new VideoClip(file1);
-        clip->masterclip->source = file1;
+        std::get<VideoClip*>(clip->masterclip)->source = file1;
         return clip;
     }
 
@@ -118,6 +118,7 @@ int main(){
 
         tl.update(dt);
         render.update_preview_tex(&tl);
+        
         log("draw tl");
         UIimport.draw();
         UImediapool.draw(&mediapool);

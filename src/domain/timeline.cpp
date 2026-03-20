@@ -9,7 +9,7 @@ clip, videoref
 get_clip_frame(timestamp, clip, videoref): uint8_t
 get_clip_tex(timestamp, clip, videoref): 
 */
-static bool debug = true;
+static bool debug = false;
 
 Clip* Timeline::add_clip(size_t track, float time0, float time1){
     int _id = 0;

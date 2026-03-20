@@ -1,5 +1,23 @@
 #include "shadercomponent.hpp"
 
+std::string fs_source = readFileToString("shaders/overlay.frag.glsl");
+const char* fs = fs_source.c_str();
+std::string vs_source = readFileToString("shaders/overlay.vertex.glsl");
+const char* vs = vs_source.c_str();
+
+
+std::string fs_transform_source = readFileToString("shaders/transform.frag.glsl");
+const char* fs_transform = fs_transform_source.c_str();
+std::string vs_transform_source = readFileToString("shaders/transform.vertex.glsl");
+const char* vs_transform = vs_transform_source.c_str();
+
+
+
+std::string fs_default_source = readFileToString("shaders/default.frag.glsl");
+const char* fs_default = fs_default_source.c_str();
+std::string vs_default_source = readFileToString("shaders/default.vertex.glsl");
+const char* vs_default = vs_default_source.c_str();
+
 void ComponentShader::bind_shader(const char* vs, const char* fs){
     this->shader = createShader(vs, fs);
 }

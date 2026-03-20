@@ -11,7 +11,14 @@ GLuint create_texture(){
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     return tex;
 }
-
+  void geterr(const char* info){
+    GLenum err = glGetError();
+    // logi();
+    if (err){
+      printf("gl error %d em %s\n", err, info);
+      throw 0;
+    }
+  }
 void image_to_tex(GLuint tex, uint8_t* buffer, int w, int h){
   PROFILE_FUNCTION();
 
@@ -24,18 +31,15 @@ void image_to_tex(GLuint tex, uint8_t* buffer, int w, int h){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA,
-        w,
-        h,
-        0,
-        GL_RGBA,
-        GL_UNSIGNED_BYTE,
-        buffer
-    );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
+}
+void tex_to_image(GLuint tex, uint8_t* buffer, int w, int h){
+    printf("--tex to image\n");
+    glBindTexture(GL_TEXTURE_2D, tex);
+    geterr("bind tex");
+    glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+    geterr("read pixels");
 }
 void RenderQuad()
 {
@@ -108,7 +112,7 @@ GLuint createShader(const char* vs, const char* fs)
     return program;
 }
 
-void overlap_textures(GLuint tex_below, GLuint tex_above, GLuint result_tex, GLuint fbo, GLuint shader)
+void overlap_textures(const GLuint tex_below, const GLuint tex_above, const GLuint result_tex, const GLuint fbo, const GLuint shader)
 {
     // static GLuint fbo = 0;
 
@@ -173,20 +177,3 @@ std::string readFileToString(const std::string& filename) {
 
 }
 
-std::string fs_source = readFileToString("shaders/overlay.frag.glsl");
-const char* fs = fs_source.c_str();
-std::string vs_source = readFileToString("shaders/overlay.vertex.glsl");
-const char* vs = vs_source.c_str();
-
-
-std::string fs_transform_source = readFileToString("shaders/transform.frag.glsl");
-const char* fs_transform = fs_transform_source.c_str();
-std::string vs_transform_source = readFileToString("shaders/transform.vertex.glsl");
-const char* vs_transform = vs_transform_source.c_str();
-
-
-
-std::string fs_default_source = readFileToString("shaders/default.frag.glsl");
-const char* fs_default = fs_default_source.c_str();
-std::string vs_default_source = readFileToString("shaders/default.vertex.glsl");
-const char* vs_default = vs_default_source.c_str();

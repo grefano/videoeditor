@@ -10,7 +10,6 @@ void ClipReadWrite::get_clip_tex_result(std::list<std::unique_ptr<ComponentShade
     log("COMP\n");
     compptr.get()->get_tex(raw_tex, result_tex, fbo);
   }
-
 }
 
 void ClipReadWrite::update_image(VideoReader* reader, float ts){
@@ -59,6 +58,7 @@ Render::~Render(){
   glDeleteTextures(1, &this->clip_tex);
   glDeleteProgram(this->shd_overlap);
 }
+
 void Render::update_preview_tex(Timeline* tl){
   PROFILE_FUNCTION();
   static double then = 0;
@@ -107,24 +107,3 @@ void Render::get_tex(Clip* clip, VideoClip* masterclip, float rel_ts){
   ClipReadWrite::get_clip_tex_result(&clip->shader_components, this->clip_tex, this->clip_result_tex, this->fbo);
 
 }
-
-//   ImVec2 dim = {640, 360};
-//   std::vector<uint8_t> pixels(dim.x * dim.y * 4);
-//   glReadPixels(0,0,640,360,GL_RGBA,GL_UNSIGNED_BYTE, pixels.data());
-
-//   SwsContext* sws = sws_getContext(
-//     dim.x, dim.y, AV_PIX_FMT_RGBA,
-//     dim.x, dim.y, AV_PIX_FMT_YUV420P,
-//     SWS_BILINEAR, nullptr, nullptr, nullptr
-
-//   );
-//   // sws_scale(sws, )
-//   AVCodec* codec = avcodec_find_encoder(AV_CODEC_ID_H264);
-//   AVCodecContext* ctx = avcodec_alloc_context3(codec);
-//   ctx->width = dim.x;
-//   ctx->height = dim.y;
-//   ctx->time_base = {1, 60};
-//   ctx->framerate = {60, 1};
-//   ctx->pix_fmt = AV_PIX_FMT_YUV420P;
-//   avcodec_open2
-// }

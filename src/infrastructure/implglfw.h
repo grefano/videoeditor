@@ -14,6 +14,8 @@ Glfw::Glfw(){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+    
     window_ = glfwCreateWindow(1280, 720, "editor", NULL, NULL);
     if (!window_){
         //printf("falha ao criar janela");

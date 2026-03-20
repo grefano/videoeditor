@@ -6,6 +6,16 @@
 #include <memory>
 #include <imgui.h>
 
+
+extern const char* vs;
+extern const char* fs;
+
+extern const char* vs_transform;
+extern const char* fs_transform;
+
+
+extern const char* vs_default;
+extern const char* fs_default;
 struct ComponentShader{
     GLuint shader = 0;
     void bind_shader(const char* vs, const char* fs);

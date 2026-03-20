@@ -10,8 +10,8 @@ namespace ClipReadWrite{
 
 class Timeline;
 class Render{
-  uint8_t* playhead_frame = nullptr;
   public:
+
   GLuint temp_tex = 0;
   GLuint clip_tex = 0;
   GLuint clip_result_tex = 0;
@@ -22,8 +22,13 @@ class Render{
 
   void init_shader();
   void update_preview_tex(Timeline*);
-  void render();
+  void render(GLuint fbo);
   Render(ImVec2 preview_dimensions);
   ~Render();
   void get_tex(Clip* clip, VideoClip* masterclip, float rel_ts);
+  
+  private:
+  uint8_t* playhead_frame = nullptr;
+ 
 };
+

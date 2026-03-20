@@ -1,0 +1,3 @@
+J:/code/videoeditor/sandbox/build/CMakeFiles/sandbox.dir
+J:/code/videoeditor/sandbox/build/CMakeFiles/edit_cache.dir
+J:/code/videoeditor/sandbox/build/CMakeFiles/rebuild_cache.dir

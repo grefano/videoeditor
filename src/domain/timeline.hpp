@@ -87,5 +87,9 @@ struct Timeline{
     Clip* add_clip(size_t track, float time0, float time1);
     void update(double dt);
     void key_callback(int key, int action);
+  GLuint playhead_tex = 0;
+    void init_shader();
+    ~Timeline();
+    Timeline();
 };
 

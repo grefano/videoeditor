@@ -143,7 +143,7 @@ int main(){
     log("update");
         
     tl.update(dt);
-    render.update_tex(&tl, render.playhead_tex, render.fbo);
+    render.update_tex(&tl, tl.playhead_tex, render.fbo);
 
     if (    render.update_tex(&tl, renderfile.tex, renderfile.fbo)){
         
@@ -166,7 +166,7 @@ int main(){
         UIimport.draw();
         UImediapool.draw(&mediapool);
         UItl.draw();
-        UIpreview.draw(&tl, render.playhead_tex, render.preview_dimensions);
+        UIpreview.draw(&tl, tl.playhead_tex, render.preview_dimensions);
         ImGui::Render();
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();

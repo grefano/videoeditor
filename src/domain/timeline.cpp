@@ -39,8 +39,17 @@ void Timeline::update(double dt){
 
 
 }
+Timeline::Timeline(){
+    this->init_shader();
+}
+void Timeline::init_shader(){
+  glGenTextures(1, &this->playhead_tex);
 
+}
 
+Timeline::~Timeline(){
+    glDeleteTextures(1, &this->playhead_tex);
+}
 
 void Timeline::key_callback(int key, int action){
     bool wasPlaying = this->isPlaying;

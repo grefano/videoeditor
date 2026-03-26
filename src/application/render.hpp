@@ -18,7 +18,7 @@ class Render{
   GLuint shd_overlap = 0;
   GLuint fbo = 0;
   ImVec2 preview_dimensions;
-  GLuint playhead_tex = 0;
+  // GLuint playhead_tex = 0;
 
   void init_shader();
   bool update_tex(Timeline*, GLuint&,GLuint&);

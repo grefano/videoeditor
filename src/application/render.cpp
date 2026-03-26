@@ -41,7 +41,6 @@ void Render::init_shader(){
   glGenFramebuffers(1, &this->fbo);
   glGenTextures(1, &this->clip_tex);
   glGenTextures(1, &this->clip_result_tex);
-  glGenTextures(1, &this->playhead_tex);
   glGenTextures(1, &this->temp_tex);
   this->shd_overlap= createShader(vs, fs);
 
@@ -53,7 +52,6 @@ Render::Render(ImVec2 preview_dimensions) : preview_dimensions(preview_dimension
 }
 Render::~Render(){
   glDeleteFramebuffers(1, &this->fbo);
-  glDeleteTextures(1, &this->playhead_tex);
   glDeleteTextures(1, &this->clip_result_tex);
   glDeleteTextures(1, &this->clip_tex);
   glDeleteProgram(this->shd_overlap);
@@ -103,7 +101,7 @@ void Render::get_tex(Clip* clip, VideoClip* masterclip, float rel_ts){
   VideoReader* reader = &masterclip->reader;
   ClipReadWrite::update_image(reader, rel_ts);
   log("w %f h %f\n", reader->w, reader->h);
-  log("textures clip %d clip res %d playhead %d\n fbo %d\n", this->clip_tex, this->clip_result_tex, this->playhead_tex, this->fbo);
+  log("textures clip %d clip res %d \n fbo %d\n", this->clip_tex, this->clip_result_tex, this->fbo);
   image_to_tex(this->clip_tex, reader->state.frame_buffer, reader->w, reader->h);
   ClipReadWrite::get_clip_tex_result(&clip->shader_components, this->clip_tex, this->clip_result_tex, this->fbo);
 

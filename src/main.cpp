@@ -141,9 +141,9 @@ int main(){
         ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
         // comp2->position.x -= dt*.001;
     log("update");
-
+        
     tl.update(dt);
-    render.update_preview_tex(&tl);
+    render.update_tex(&tl, render.playhead_tex);
 
     // glBindFramebuffer(GL_FRAMEBUFFER, renderfile.fbo);
     // geterr("bind framebuffer");

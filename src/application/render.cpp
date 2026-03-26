@@ -59,7 +59,7 @@ Render::~Render(){
   glDeleteProgram(this->shd_overlap);
 }
 
-void Render::update_preview_tex(Timeline* tl){
+void Render::update_tex(Timeline* tl, GLuint& outtex){
   PROFILE_FUNCTION();
   static double then = 0;
   double now = glfwGetTime();
@@ -72,7 +72,7 @@ void Render::update_preview_tex(Timeline* tl){
   WalkerTimeline::walk(tl, &clips);
   // log("--clip walk size=%zu\n", clips.size());
   int i = 0;
-  
+  // GLuint& outtex = this->playhead_tex;
   for (Clip* clip : clips){
       log("clip t0 %f t1 %f\n", clip->tl_time0, clip->tl_time1);
       float rel_ts = tl->playhead_time - clip->tl_time0;
@@ -80,15 +80,15 @@ void Render::update_preview_tex(Timeline* tl){
         continue;
       }
 
-      log("textures clip %d clip res %d playhead %d\n fbo %d\n", this->clip_tex, this->clip_result_tex, this->playhead_tex, this->fbo);
+      log("textures clip %d clip res %d playhead %d\n fbo %d\n", this->clip_tex, this->clip_result_tex, outtex, this->fbo);
    
       std::visit([this, clip, rel_ts](auto master){ this->get_tex(clip, master, rel_ts); }, clip->masterclip);
 
       if (i == 0) {
-          overlap_textures(this->clip_result_tex, this->clip_result_tex, this->playhead_tex, this->fbo, this->shd_overlap);
+          overlap_textures(this->clip_result_tex, this->clip_result_tex, outtex, this->fbo, this->shd_overlap);
       } else {
-          overlap_textures(this->clip_result_tex, this->playhead_tex, this->temp_tex, this->fbo, this->shd_overlap);
-          std::swap(this->playhead_tex, this->temp_tex);
+          overlap_textures(this->clip_result_tex, outtex, this->temp_tex, this->fbo, this->shd_overlap);
+          std::swap(outtex, this->temp_tex);
       }
       i++;
   };

@@ -57,7 +57,7 @@ Render::~Render(){
   glDeleteProgram(this->shd_overlap);
 }
 
-bool Render::update_tex(Timeline* tl, GLuint& outtex, GLuint& fbo){
+bool Render::update_tex(Timeline* tl, float time, GLuint& outtex, GLuint& fbo){
   PROFILE_FUNCTION();
   // static double then = 0;
   // double now = glfwGetTime();
@@ -73,8 +73,8 @@ bool Render::update_tex(Timeline* tl, GLuint& outtex, GLuint& fbo){
   // GLuint& outtex = this->playhead_tex;
   for (Clip* clip : clips){
       log("clip t0 %f t1 %f\n", clip->tl_time0, clip->tl_time1);
-      float rel_ts = tl->playhead_time - clip->tl_time0;
-      if (tl->playhead_time < clip->tl_time0 || tl->playhead_time > clip->tl_time1){
+      float rel_ts = time - clip->tl_time0;
+      if (time < clip->tl_time0 || time > clip->tl_time1){
         continue;
       }
 

@@ -63,7 +63,7 @@ void render_dur(Renderfile& renderfile, double dur){
 
   
     printf("render add frame\n");
-    renderfile.render();
+    renderfile.add_tex_frame();
 
     
     
@@ -95,6 +95,7 @@ int main(){
     });
     Render render(ImVec2(640, 360));
     Renderfile renderfile;
+    renderfile.cb_update_tex = [&render, &tl](float t, GLuint& tex, GLuint& fbo){ return render.update_tex(&tl, t, tex, fbo); };
     // renderfile.fbo = render.fbo;
     log("render");
     Mediapool mediapool;
@@ -130,8 +131,10 @@ int main(){
     ImportUI UIimport;
     UIimport.app.import = [&import](char* filepath){ import.import_filepath(filepath); };
     MediapoolUI UImediapool;
+    RenderUI UIrender;
+    UIrender.cb_start = [&renderfile](){ renderfile.init({640, 360}); };
 
-    renderfile.init({640, 360});
+    // renderfile.init({640, 360});
     profile_before.Stop();
     double lasttime = glfwGetTime();
     while (!glfwWindowShouldClose(glfw.window_)) {
@@ -151,14 +154,23 @@ int main(){
         if (now - lasttime >= 1.0f/30.0f){
             lasttime = now;
 
-             render.update_tex(&tl, tl.playhead_tex, render.fbo);
-            static int q = 0;
-            if (    render.update_tex(&tl, renderfile.tex, renderfile.fbo)){
-                q++;
-                printf("Q %d\n", q);
-                render_dur(renderfile, 5);
-            }
+            render.update_tex(&tl, tl.playhead_time, tl.playhead_tex, render.fbo);
+
+            
+            // static int q = 0;
+            // if (    render.update_tex(&tl, renderfile.tex, renderfile.fbo)){
+            //     q++;
+            //     printf("Q %d\n", q);
+            //     render_dur(renderfile, 5);
+            // }
         }
+        static bool _render = true;
+        if (_render){
+            renderfile.render({0, 10});
+            _render = false;
+        }
+        
+
             // overlap_textures(0, tl.playhead_tex, renderfile.tex, renderfile.fbo, render.shd_overlap);
             // render_dur(renderfile, 5);
         
@@ -177,6 +189,9 @@ int main(){
         UImediapool.draw(&mediapool);
         UItl.draw();
         UIpreview.draw(&tl, tl.playhead_tex, render.preview_dimensions);
+        UIrender.draw();
+
+
         ImGui::Render();
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();

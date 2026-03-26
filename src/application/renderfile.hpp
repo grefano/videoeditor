@@ -17,18 +17,22 @@ class Renderfile{
   videoWriterFfmpeg videowriter;
 
   public:
+  bool is_rendering = false;
+  float tl_time = 0;
   ImVec2 indim = {0,0};
 
   GLuint tex = 0;
   GLuint fbo = 0;
   std::vector<uint8_t> pixels;
 
-
+  std::function<bool(float, GLuint&, GLuint&)> cb_update_tex;
   void init(ImVec2 dim);
   void init_tex(ImVec2 indim);
   void tex_to_pixels();
   void end();
-  void render();
+  void update();
+  void render(ImVec2);
+  void add_tex_frame();
   ~Renderfile(){
     end();
   }
@@ -56,7 +60,7 @@ void Renderfile::init_tex(ImVec2 indim){
 void Renderfile::init(ImVec2 indim){
   printf("init\n");
   // this->dim = dim;
-  
+  is_rendering = true;
 
   pixels.clear();
   pixels.resize(indim.x * indim.y * 4);
@@ -71,7 +75,21 @@ void Renderfile::init(ImVec2 indim){
   }
   
 }
+void Renderfile::render(ImVec2 time_region){
+  assert(time_region.y > time_region.x);
+  assert(cb_update_tex);
+  init({640, 360});
+  for(float t = time_region.x; t < time_region.y; t+=1.0f/30.0f){
+      printf("t %f\n", t);
+      if (this->cb_update_tex(t, tex, fbo)){//render.update_tex(&tl, t, renderfile.tex, renderfile.fbo
+        add_tex_frame();
+      }
 
+  }
+  end();
+
+
+}
 void pixels_yuv_create(std::vector<uint8_t>& pixels, int frame){
   for(int i = 0; i < pixels.size(); i+=4){
     // pixels[i] = 100 + sin(i/100)*100;
@@ -94,7 +112,9 @@ void Renderfile::tex_to_pixels(){
   geterr();
   
 }
-void Renderfile::render(){
+
+// add frame 
+void Renderfile::add_tex_frame(){
   // GLuint& fbo = this->fbo;
   printf("--render\n");
 // static double then = 0;
@@ -123,6 +143,8 @@ glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderfile::end(){
+  is_rendering = false;
+
   glDeleteTextures(1, &tex);
   glDeleteFramebuffers(1, &fbo);
 

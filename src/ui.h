@@ -316,4 +316,18 @@ struct MediapoolUI{
         ImGui::End();
     }
 };
-/* import domain */
+
+
+struct RenderUI{
+    ImVec2 time_region = {0,0};
+    std::function<void()> cb_start;
+    void draw(){
+        ImGui::Begin("render");
+        ImGui::InputFloat("time start", &time_region.x);
+        ImGui::InputFloat("time end", &time_region.y);
+        if(ImGui::Button("start")){
+            cb_start();
+        }
+        ImGui::End();
+    }
+};

@@ -143,19 +143,13 @@ int main(){
     log("update");
         
     tl.update(dt);
-    render.update_tex(&tl, render.playhead_tex);
+    render.update_tex(&tl, render.playhead_tex, render.fbo);
 
-    // glBindFramebuffer(GL_FRAMEBUFFER, renderfile.fbo);
-    // geterr("bind framebuffer");
-    // glBindTexture(GL_TEXTURE_2D, renderfile.tex);
-    // printf("renderfile tex %d\n", renderfile.tex);
-    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderfile.tex, 0);
-    // geterr("fbo tex 2d");
-    // // glClearColor((sin((float)i / 2) + 1)/2, 1.0, 0, 1.0);
-    // glClearColor(0.5, 1.0, 0.0, 1.0);
-    // glClear(GL_COLOR_BUFFER_BIT);
-    overlap_textures(0, render.playhead_tex, renderfile.tex, renderfile.fbo, render.shd_overlap);
+    if (    render.update_tex(&tl, renderfile.tex, renderfile.fbo)){
+        
+        // overlap_textures(0, render.playhead_tex, renderfile.tex, renderfile.fbo, render.shd_overlap);
     render_dur(renderfile, 5);
+}
     
         // render.render();
         log("draw tl");

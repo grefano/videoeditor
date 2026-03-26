@@ -59,12 +59,12 @@ Render::~Render(){
   glDeleteProgram(this->shd_overlap);
 }
 
-void Render::update_tex(Timeline* tl, GLuint& outtex){
+bool Render::update_tex(Timeline* tl, GLuint& outtex, GLuint& fbo){
   PROFILE_FUNCTION();
   static double then = 0;
   double now = glfwGetTime();
   if (now - then < 1.0f/30.0f){
-    return;
+    return false;
   }
   then = now;
   // walker -> lista de clipes na ordem certa -> chamar clip.get_image pra todos -> imagem final
@@ -80,18 +80,19 @@ void Render::update_tex(Timeline* tl, GLuint& outtex){
         continue;
       }
 
-      log("textures clip %d clip res %d playhead %d\n fbo %d\n", this->clip_tex, this->clip_result_tex, outtex, this->fbo);
+      log("textures clip %d clip res %d playhead %d\n fbo %d\n", this->clip_tex, this->clip_result_tex, outtex, fbo);
    
       std::visit([this, clip, rel_ts](auto master){ this->get_tex(clip, master, rel_ts); }, clip->masterclip);
 
       if (i == 0) {
-          overlap_textures(this->clip_result_tex, this->clip_result_tex, outtex, this->fbo, this->shd_overlap);
+          overlap_textures(this->clip_result_tex, this->clip_result_tex, outtex, fbo, this->shd_overlap);
       } else {
-          overlap_textures(this->clip_result_tex, outtex, this->temp_tex, this->fbo, this->shd_overlap);
+          overlap_textures(this->clip_result_tex, outtex, this->temp_tex, fbo, this->shd_overlap);
           std::swap(outtex, this->temp_tex);
       }
       i++;
   };
+  return true;
 }
 void Render::get_tex(Clip* clip, VideoClip* masterclip, float rel_ts){
     PROFILE_FUNCTION();

@@ -21,7 +21,7 @@ class Render{
   GLuint playhead_tex = 0;
 
   void init_shader();
-  void update_tex(Timeline*, GLuint&);
+  bool update_tex(Timeline*, GLuint&,GLuint&);
   void render(GLuint fbo);
   Render(ImVec2 preview_dimensions);
   ~Render();

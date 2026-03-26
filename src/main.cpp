@@ -132,14 +132,16 @@ int main(){
     UIimport.app.import = [&import](char* filepath){ import.import_filepath(filepath); };
     MediapoolUI UImediapool;
     RenderUI UIrender;
-    UIrender.cb_start = [&renderfile](){ renderfile.init({640, 360}); };
+    UIrender.cb_start = [&renderfile](ImVec2 time){ renderfile.render(time); };
 
     // renderfile.init({640, 360});
     profile_before.Stop();
     double lasttime = glfwGetTime();
+    double timeaccum = 0.0f;
     while (!glfwWindowShouldClose(glfw.window_)) {
         double now = glfwGetTime();
-        double dt = now - lasttime;        
+        double dt = now - lasttime;     
+        timeaccum+=dt;   
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -151,29 +153,16 @@ int main(){
 
         // static double then = 0;
         // double now = glfwGetTime();
-        if (now - lasttime >= 1.0f/30.0f){
-            lasttime = now;
-
+        printf("time diff %f\n", now - lasttime);
+        if (timeaccum >= 1.0f/30.0f){
             render.update_tex(&tl, tl.playhead_time, tl.playhead_tex, render.fbo);
-
-            
-            // static int q = 0;
-            // if (    render.update_tex(&tl, renderfile.tex, renderfile.fbo)){
-            //     q++;
-            //     printf("Q %d\n", q);
-            //     render_dur(renderfile, 5);
-            // }
-        }
-        static bool _render = true;
-        if (_render){
-            renderfile.render({0, 10});
-            _render = false;
-        }
         
-
+            timeaccum = 0;
+        } 
+        lasttime = now;
             // overlap_textures(0, tl.playhead_tex, renderfile.tex, renderfile.fbo, render.shd_overlap);
             // render_dur(renderfile, 5);
-        
+            
         // render.render();
         log("draw tl");
         // log("tex = %d\n", tl.playhead_tex);

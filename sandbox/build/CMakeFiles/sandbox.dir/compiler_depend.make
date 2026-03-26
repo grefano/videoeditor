@@ -551,6 +551,7 @@ CMakeFiles/sandbox.dir/renderfile.cpp.obj: J:/code/videoeditor/sandbox/renderfil
   J:/code/videoeditor/vendor/imgui/docking/imgui.h \
   J:/code/videoeditor/vendor/imgui/docking/imgui_impl_glfw.h \
   J:/code/videoeditor/vendor/imgui/docking/imgui_impl_opengl3.h \
+  J:/code/videoeditor/sandbox/renderfile.hpp \
   J:/code/videoeditor/sandbox/videowriter.hpp
 
 
@@ -977,6 +978,8 @@ C:/msys64/ucrt64/include/swprintf.inl:
 C:/msys64/ucrt64/include/sys/types.h:
 
 C:/msys64/ucrt64/include/time.h:
+
+J:/code/videoeditor/sandbox/renderfile.hpp:
 
 C:/msys64/ucrt64/include/libavutil/error.h:
 

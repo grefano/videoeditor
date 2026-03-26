@@ -63,7 +63,7 @@ void Renderfile::init(ImVec2 indim){
   this->indim = indim;
  init_tex(indim);
   try{
-    videowriter.init(indim, {320, 180}, "output.mp4");
+    videowriter.init(indim, {640, 360}, "output.mp4");
   } catch (std::exception& e){
     printf("error init videowriter %s\n", e.what());
     videowriter.end();
@@ -97,11 +97,11 @@ void Renderfile::tex_to_pixels(){
 void Renderfile::render(){
   // GLuint& fbo = this->fbo;
   printf("--render\n");
-static double then = 0;
-    double now = glfwGetTime();
-    if (now - then < 1.0f/30.0f){
-        return;
-    }
+// static double then = 0;
+//     double now = glfwGetTime();
+//     if (now - then < 1.0f/30.0f){
+//         return;
+//     }
     
  
   printf("tex %d fbo %d\n", tex, fbo);

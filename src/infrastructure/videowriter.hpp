@@ -12,9 +12,21 @@ struct OutputVideoState{
   
 
 };
+
 struct videoWriterFfmpeg{
   OutputVideoState state;
   int frame_index = 0;
+  void flush_packets() {
+      AVPacket* packet = av_packet_alloc();
+      while (avcodec_receive_packet(state.codec_ctx, packet) == 0) {
+          packet->stream_index = state.stream->index;
+          av_packet_rescale_ts(packet, state.codec_ctx->time_base, state.stream->time_base);
+          if (av_interleaved_write_frame(state.fmt_ctx, packet) < 0)
+              throw std::runtime_error("write frame");
+          av_packet_unref(packet);
+      }
+      av_packet_free(&packet);
+  }
 
   //@param dim output dimensions
   void init(ImVec2 indim, ImVec2 outdim, const char* name){
@@ -70,8 +82,12 @@ struct videoWriterFfmpeg{
     if (avformat_write_header(fmt_ctx, nullptr) < 0){
       throw std::runtime_error("avformat write header");
     }
+
+    printf("codec time_base: %d/%d\n", codec_ctx->time_base.num, codec_ctx->time_base.den);
+    printf("stream time_base: %d/%d\n", stream->time_base.num, stream->time_base.den);
   }
   void add_frame(std::vector<uint8_t>& pixels){
+    printf("frame index %d\n", frame_index);
     assert(pixels.data() != nullptr);
 
     auto& frame = state.frame;
@@ -92,29 +108,16 @@ struct videoWriterFfmpeg{
 
 
     
-    frame->pts = frame_index++; // !!! unidade provavelmente errada
+    frame->pts = this->frame_index++; // !!! unidade provavelmente errada
     int res = avcodec_send_frame(codec_ctx, frame);
     printf("send frame %i\n", res);
     if (res < 0){
-      printf(" %d ", res);
+      printf("drnfg %d ", res);
       throw std::runtime_error("send frame");
-    
+      
     }
-    AVPacket* packet = av_packet_alloc();
+    flush_packets();
 
-
-    while(avcodec_receive_packet(codec_ctx, packet) == 0){
-    printf("got packet\n");
-
-      packet->stream_index = stream->index;
-      av_packet_rescale_ts(packet, codec_ctx->time_base, stream->time_base);
-      if(av_interleaved_write_frame(fmt_ctx, packet)){
-        throw std::runtime_error("write frame");
-      }
-      av_packet_unref(packet);
-    }
-
-    av_packet_free(&packet);
 
   }
   void end(){

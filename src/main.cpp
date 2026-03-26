@@ -62,7 +62,7 @@ void render_dur(Renderfile& renderfile, double dur){
     }
 
   
-    
+    printf("render add frame\n");
     renderfile.render();
 
     
@@ -145,11 +145,11 @@ int main(){
     tl.update(dt);
     render.update_tex(&tl, tl.playhead_tex, render.fbo);
 
-    if (    render.update_tex(&tl, renderfile.tex, renderfile.fbo)){
+    // if (    render.update_tex(&tl, renderfile.tex, renderfile.fbo)){
         
-        // overlap_textures(0, render.playhead_tex, renderfile.tex, renderfile.fbo, render.shd_overlap);
+        overlap_textures(0, tl.playhead_tex, renderfile.tex, renderfile.fbo, render.shd_overlap);
     render_dur(renderfile, 5);
-}
+// }
     
         // render.render();
         log("draw tl");
@@ -159,7 +159,6 @@ int main(){
         ImGui::Image( render.clip_tex, ImVec2(640, 360));
         ImGui::Image( render.clip_result_tex, ImVec2(640, 360));
 
-        printf("image renderfile tex %d\n", renderfile.tex);
         ImGui::Image( renderfile.tex, ImVec2(640, 360));
         
         

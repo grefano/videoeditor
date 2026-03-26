@@ -1,5 +1,6 @@
 CMakeFiles/sandbox.dir/renderfile.cpp.obj: \
  J:\code\videoeditor\sandbox\renderfile.cpp \
+ J:\code\videoeditor\sandbox\renderfile.hpp \
  J:/code/videoeditor/src/infrastructure/opengl.h \
  J:/code/videoeditor/vendor/glad.h \
  C:/msys64/ucrt64/include/KHR/khrplatform.h \

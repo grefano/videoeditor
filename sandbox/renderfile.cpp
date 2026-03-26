@@ -1,7 +1,6 @@
 #include "renderfile.hpp"
 
 int main(){
-  return 0;
   if (!glfwInit()){
     printf("%s\n", "falha inicializando glfw");
     return -1;
@@ -19,7 +18,7 @@ int main(){
   
   
   printf("init\n");
-  for(int i = 0; i < 60; i++){
+  for(int i = 0; i < 300; i++){
     try{
       // pixels_yuv_create(render.pixels, i);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, render.tex, 0);

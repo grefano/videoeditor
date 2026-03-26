@@ -114,7 +114,6 @@ GLuint createShader(const char* vs, const char* fs)
 
 void overlap_textures(const GLuint tex_below, const GLuint tex_above, const GLuint result_tex, const GLuint fbo, const GLuint shader)
 {   
-    printf("overlap\n");
     // static GLuint fbo = 0;
 
 

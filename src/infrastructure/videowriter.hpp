@@ -21,8 +21,11 @@ struct videoWriterFfmpeg{
       while (avcodec_receive_packet(state.codec_ctx, packet) == 0) {
           packet->stream_index = state.stream->index;
           av_packet_rescale_ts(packet, state.codec_ctx->time_base, state.stream->time_base);
-          if (av_interleaved_write_frame(state.fmt_ctx, packet) < 0)
+          if (int res = av_interleaved_write_frame(state.fmt_ctx, packet) < 0){
+            printf("err %d\n", res);
               throw std::runtime_error("write frame");
+
+          }
           av_packet_unref(packet);
       }
       av_packet_free(&packet);
@@ -59,7 +62,7 @@ struct videoWriterFfmpeg{
     codec_ctx = avcodec_alloc_context3(codec);
     codec_ctx->width = outdim.x;
     codec_ctx->height = outdim.y;
-    codec_ctx->time_base = {fps.den, fps.num};
+    codec_ctx->time_base = {1, 90000};//{fps.den, fps.num};
     codec_ctx->framerate = fps;
     codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
     codec_ctx->gop_size = 10;
@@ -107,8 +110,9 @@ struct videoWriterFfmpeg{
     sws_scale( sws, inData, inLinesize, 0, outdim.y, frame->data, frame->linesize);
 
 
-    
-    frame->pts = this->frame_index++; // !!! unidade provavelmente errada
+    printf("timebase %d %d\n", codec_ctx->time_base.num, codec_ctx->time_base.den); // 50 * 1
+    frame->pts = av_rescale_q(frame_index, (AVRational){codec_ctx->framerate.den, codec_ctx->framerate.num}, codec_ctx->time_base);///this->frame_index * codec_ctx->time_base.den / codec_ctx->time_base.num; // !!! unidade provavelmente errada
+    this->frame_index++;
     int res = avcodec_send_frame(codec_ctx, frame);
     printf("send frame %i\n", res);
     if (res < 0){

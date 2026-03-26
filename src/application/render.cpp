@@ -59,12 +59,12 @@ Render::~Render(){
 
 bool Render::update_tex(Timeline* tl, GLuint& outtex, GLuint& fbo){
   PROFILE_FUNCTION();
-  static double then = 0;
-  double now = glfwGetTime();
-  if (now - then < 1.0f/30.0f){
-    return false;
-  }
-  then = now;
+  // static double then = 0;
+  // double now = glfwGetTime();
+  // if (now - then < 1.0f/30.0f){
+  //   return false;
+  // }
+  // then = now;
   // walker -> lista de clipes na ordem certa -> chamar clip.get_image pra todos -> imagem final
   std::list<Clip*> clips;
   WalkerTimeline::walk(tl, &clips);

@@ -69,6 +69,9 @@ void render_dur(Renderfile& renderfile, double dur){
     
 }
 
+
+
+
 // PreviewUI UIpreview2("preview2");
 int main(){
     if (!glfwInit()){
@@ -134,7 +137,6 @@ int main(){
     while (!glfwWindowShouldClose(glfw.window_)) {
         double now = glfwGetTime();
         double dt = now - lasttime;        
-        lasttime = now;
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -143,14 +145,23 @@ int main(){
     log("update");
         
     tl.update(dt);
-    render.update_tex(&tl, tl.playhead_tex, render.fbo);
 
-    // if (    render.update_tex(&tl, renderfile.tex, renderfile.fbo)){
+        // static double then = 0;
+        // double now = glfwGetTime();
+        if (now - lasttime >= 1.0f/30.0f){
+            lasttime = now;
+
+             render.update_tex(&tl, tl.playhead_tex, render.fbo);
+            static int q = 0;
+            if (    render.update_tex(&tl, renderfile.tex, renderfile.fbo)){
+                q++;
+                printf("Q %d\n", q);
+                render_dur(renderfile, 5);
+            }
+        }
+            // overlap_textures(0, tl.playhead_tex, renderfile.tex, renderfile.fbo, render.shd_overlap);
+            // render_dur(renderfile, 5);
         
-        overlap_textures(0, tl.playhead_tex, renderfile.tex, renderfile.fbo, render.shd_overlap);
-    render_dur(renderfile, 5);
-// }
-    
         // render.render();
         log("draw tl");
         // log("tex = %d\n", tl.playhead_tex);
